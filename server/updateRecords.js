@@ -11,6 +11,7 @@ const connectdb = require("./config/database");
 const func = async () => {
   try {
     console.log("Updating database...");
+    // Put here the code to update records..
   } catch (error) {}
 };
 
