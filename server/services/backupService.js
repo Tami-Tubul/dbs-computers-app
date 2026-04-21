@@ -1,40 +1,52 @@
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage"); // Changed to use Upload
 const s3Client = require("../utils/s3Client");
 const mongoose = require("mongoose");
+const { EJSON } = require("bson");
+const zlib = require("zlib");
+const { Readable } = require("stream");
 
 const performBackup = async () => {
-  const date = new Date().toISOString().split("T")[0];
-  const fileName = `backup-${date}.json`;
+  const date = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Jerusalem",
+  });
+  const fileName = `backup-${date}.json.gz`;
 
-  console.log(`[Backup] Starting ${date}`);
+  console.log(`[Backup] Starting backup with Gzip compression`);
 
   try {
     const db = mongoose.connection.db;
-
     const collections = await db.listCollections().toArray();
-
     const backupData = {};
 
     for (const col of collections) {
       const name = col.name;
-      const data = await db.collection(name).find({}).toArray();
-      backupData[name] = data;
+      backupData[name] = await db.collection(name).find({}).toArray();
     }
 
-    const jsonData = JSON.stringify(backupData);
+    const jsonString = EJSON.stringify(backupData, { relaxed: false });
 
-    await s3Client.send(
-      new PutObjectCommand({
+    // Create the stream pipeline
+    const inputStream = Readable.from(jsonString);
+    const gzip = zlib.createGzip();
+    const compressedStream = inputStream.pipe(gzip);
+
+    // Using @aws-sdk/lib-storage to handle the stream upload safely
+    const parallelUpload = new Upload({
+      client: s3Client,
+      params: {
         Bucket: process.env.S3_BUCKET_NAME,
         Key: `backups/${fileName}`,
-        Body: jsonData,
-        ContentType: "application/json",
-      }),
-    );
+        Body: compressedStream,
+        ContentType: "application/gzip",
+      },
+    });
 
-    console.log("[Backup] Uploaded to S3 successfully");
+    // Wait for the upload to complete
+    await parallelUpload.done();
+
+    console.log("[Backup] Compressed and uploaded to S3 successfully");
   } catch (err) {
-    console.error("[Backup] failed:", err);
+    console.error("[Backup] Backup failed:", err);
     throw err;
   }
 };
