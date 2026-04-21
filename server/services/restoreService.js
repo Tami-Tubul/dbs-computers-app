@@ -32,7 +32,13 @@ const restoreFromS3 = async (fileKey, targetDbUri) => {
 
   console.log("[Restore] Connecting to target database...");
   await mongoose.connect(targetDbUri);
+
+  if (mongoose.connection.readyState !== 1) {
+    await new Promise((resolve) => mongoose.connection.once("open", resolve));
+  }
+
   const db = mongoose.connection.db;
+  console.log("[Restore] Database connection is READY.");
 
   const data = await s3Client.send(
     new GetObjectCommand({
