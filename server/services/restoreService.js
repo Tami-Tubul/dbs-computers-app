@@ -21,8 +21,16 @@ const modelMap = {
 };
 
 const restoreFromS3 = async (fileKey, targetDbUri) => {
-  console.log("[Restore] Connecting to target database...");
+  console.log("[Restore] Checking database connection...");
 
+  if (mongoose.connection.readyState !== 0) {
+    console.log(
+      "[Restore] Closing existing connection before re-connecting...",
+    );
+    await mongoose.disconnect();
+  }
+
+  console.log("[Restore] Connecting to target database...");
   await mongoose.connect(targetDbUri);
   const db = mongoose.connection.db;
 
