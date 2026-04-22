@@ -5,10 +5,8 @@ const connectDB = async () => {
     const dbURI =
       process.env.MONGO_URI || "mongodb://localhost:27017/computersDB_test";
 
-    await mongoose.connect(dbURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(dbURI);
+
     console.log("MongoDB connection SUCCESS");
   } catch (err) {
     console.error("MongoDB connection FAIL");
