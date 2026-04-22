@@ -2,7 +2,7 @@ const { restoreFromS3 } = require("../services/restoreService");
 
 const restoreBackup = async (req, res) => {
   try {
-    if (req.headers["x-cron-secret"] !== process.env.CRON_SECRET) {
+    if (req.query.secret !== process.env.CRON_SECRET) {
       return res.status(401).send("Unauthorized");
     }
 

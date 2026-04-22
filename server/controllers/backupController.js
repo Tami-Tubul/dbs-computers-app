@@ -1,7 +1,7 @@
 const { performBackup } = require("../services/backupService");
 
 const runBackup = async (req, res) => {
-  if (req.headers["x-cron-secret"] !== process.env.CRON_SECRET) {
+  if (req.query.secret !== process.env.CRON_SECRET) {
     return res.status(401).send("Unauthorized");
   }
 
