@@ -14,7 +14,7 @@
   ],
   "crons": [
     {
-      "path": "/api/backup/run?secret=a438d176-9b6d-49d1-8b64-42342a1a60b5",
+      "path": "/api/backup/run?secret=de9ce7ec-cb90-40ac-ad1e-4fcfa2a52a46",
       "schedule": "0 2 * * *"
     }
   ]
