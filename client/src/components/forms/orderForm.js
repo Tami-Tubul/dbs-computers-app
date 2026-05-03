@@ -242,7 +242,7 @@ export default function OrderForm({
                     const selectedCustomer = customers.find(
                       (c) =>
                         c._id === field.value?._id ||
-                        c._id === field.value?.value
+                        c._id === field.value?.value,
                     );
                     return (
                       <CustomSelect
@@ -363,7 +363,7 @@ export default function OrderForm({
                           setValue(
                             `products.${index}.product._id`,
                             e.target.value,
-                            { shouldDirty: true, shouldValidate: true }
+                            { shouldDirty: true, shouldValidate: true },
                           )
                         }
                         isDisabled={isCloseForm}
@@ -373,7 +373,7 @@ export default function OrderForm({
                             (p) =>
                               p.category ===
                               (productCategories[index] ||
-                                field.product?.category)
+                                field.product?.category),
                           )
                           ?.list.map((product) => {
                             return (
@@ -383,14 +383,14 @@ export default function OrderForm({
                                 disabled={
                                   !product.available &&
                                   !initialData?.products?.some(
-                                    (p) => p.product?._id === product._id
+                                    (p) => p.product?._id === product._id,
                                   )
                                     ? true
                                     : false
                                 }
                               >
                                 {product.productName}
-                                {product.isAdvanced && " ⭐"}
+                                {product.computerDetails?.isAdvanced && " ⭐"}
                               </option>
                             );
                           })}
@@ -404,18 +404,18 @@ export default function OrderForm({
                     <FormControl>
                       {(() => {
                         const selectedProductId = watch(
-                          `products.${index}.product._id`
+                          `products.${index}.product._id`,
                         );
                         const selectedProduct = products
                           .find(
                             (p) =>
                               p.category ===
                               (productCategories[index] ||
-                                field.product?.category)
+                                field.product?.category),
                           )
                           ?.list.find((p) => p._id === selectedProductId);
 
-                        return selectedProduct?.isAdvanced ? (
+                        return selectedProduct?.computerDetails?.isAdvanced ? (
                           <Checkbox
                             variant={"goldCb"}
                             {...register(`products.${index}.rentedAsAdvanced`)}

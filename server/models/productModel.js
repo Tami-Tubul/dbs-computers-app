@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
+    /* ===== Core Fields ===== */
     productName: {
       type: String,
+      required: true,
+      trim: true,
     },
+
     category: {
       type: String,
       enum: [
@@ -17,51 +21,88 @@ const productSchema = new mongoose.Schema(
         "אונקי",
         "טאבלטים",
       ],
+      required: true,
     },
-    dailyPrice: {
-      type: Number,
-    },
-    company: {
-      type: String,
-    },
-    specification: {
-      type: String,
-    },
-    softwares: {
-      // for computers
-      type: Array,
-    },
-    checkDate: {
-      // for computers
-      type: Date,
-    },
-    validityWarranty: {
-      // for computers
-      type: Date,
-    },
-    isAdvanced: {
-      // for computers
-      type: Boolean,
-      default: false,
-    },
-    filtering: {
-      // for sticks & routers
-      type: String,
-    },
-    active: {
-      // for sticks & routers
-      type: Boolean,
-    },
+
     available: {
       type: Boolean,
       default: true,
     },
+
+    /* ===== Management ===== */
+    location: {
+      type: String,
+      enum: ["דניאל", "שלומי"],
+      default: "דניאל",
+    },
+
+    status: {
+      type: String,
+      enum: ["פעיל", "מושהה", "תקול", "נמכר"],
+      default: "פעיל",
+    },
+
+    notes: {
+      type: String,
+    },
+
+    /* ===== Specification & Pricing ===== */
+    specification: {
+      type: String,
+    },
+
+    dailyPrice: {
+      type: Number,
+      min: 0,
+    },
+
+    /* ===== Warranty ===== */
+    warranty: {
+      startDate: { type: Date },
+      endDate: { type: Date },
+    },
+
+    /* ===== Computer Only ===== */
+    computerDetails: {
+      isAdvanced: {
+        type: Boolean,
+        default: false,
+      },
+
+      officeLicense: {
+        type: String,
+      },
+
+      serialNumber: {
+        type: String,
+      },
+
+      checkDate: {
+        type: Date,
+      },
+
+      softwares: {
+        type: [String],
+      },
+    },
+
+    /* ===== Network Devices (Sticks / Routers) ===== */
+    networkDetails: {
+      filtering: {
+        type: String,
+      },
+
+      active: {
+        type: Boolean,
+      },
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Product =
   mongoose.models.Product || mongoose.model("Product", productSchema);
+
 module.exports = Product;
