@@ -16,8 +16,8 @@ export default function AddCustomer() {
       setIsLoading(true);
       const resp = await api.epAddCustomer(customerData, token);
       if (resp.status === 201) {
-        dispatch({ type: "ADD_CUSTOMER", payload: resp.data });
-        alert("הלקוח נוסף בהצלחה");
+        dispatch({ type: "ADD_CUSTOMER", payload: resp.data.customer });
+        alert(resp.data.message);
         navigate("/customers");
       }
     } catch (error) {

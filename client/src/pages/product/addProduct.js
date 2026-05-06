@@ -16,8 +16,8 @@ export default function AddProduct() {
       setIsLoading(true);
       const resp = await api.epAddProduct(productData, token);
       if (resp.status === 201) {
-        dispatch({ type: "ADD_PRODUCT", payload: resp.data });
-        alert("המוצר נוסף בהצלחה");
+        dispatch({ type: "ADD_PRODUCT", payload: resp.data.product });
+        alert(resp.data.message);
         navigate("/products");
       }
     } catch (error) {

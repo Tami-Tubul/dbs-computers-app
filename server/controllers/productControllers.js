@@ -111,7 +111,9 @@ const addNewProduct = async (req, res, next) => {
       ...rest,
     });
 
-    return res.status(201).json(newProduct);
+    return res
+      .status(201)
+      .json({ message: "המוצר נוסף בהצלחה", product: newProduct });
   } catch (error) {
     next(error);
   }
@@ -159,7 +161,10 @@ const editProduct = async (req, res, next) => {
       new: true,
     });
 
-    return res.status(200).json(updatedProduct);
+    return res.status(200).json({
+      message: "המוצר עודכן בהצלחה",
+      product: updatedProduct,
+    });
   } catch (error) {
     next(error);
   }

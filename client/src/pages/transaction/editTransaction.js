@@ -10,10 +10,10 @@ export default function EditTransaction() {
   const token = useSelector((state) => state.userReducer.token);
   const params = useParams(); //params.id => transactionid
   const transactions = useSelector(
-    (state) => state.transactionReducer.transactions
+    (state) => state.transactionReducer.transactions,
   );
   const transactionToEdit = transactions.find(
-    (transaction) => transaction._id === params.id
+    (transaction) => transaction._id === params.id,
   );
 
   const dispatch = useDispatch();
@@ -25,11 +25,11 @@ export default function EditTransaction() {
       const resp = await api.epEditTransaction(
         transactionData,
         params.id,
-        token
+        token,
       );
       if (resp.status === 200) {
-        dispatch({ type: "EDIT_TRANSACTION", payload: resp.data });
-        alert("הפעולה עודכנה בהצלחה");
+        dispatch({ type: "EDIT_TRANSACTION", payload: resp.data.transaction });
+        alert(resp.data.message);
         navigate("/transactions");
       }
     } catch (error) {

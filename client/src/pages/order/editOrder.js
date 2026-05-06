@@ -29,7 +29,7 @@ export default function EditOrder() {
             orderId: updatedOrder._id,
           },
         }); //update products to available true/false
-        alert("ההזמנה עודכנה בהצלחה");
+        alert(resp.data.message);
         navigate("/openOrders");
       }
     } catch (error) {

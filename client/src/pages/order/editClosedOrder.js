@@ -19,8 +19,11 @@ export default function EditClosedOrder() {
       setIsLoading(true);
       const resp = await api.epEditClosedOrder(orderData, params.id, token);
       if (resp.status === 200) {
-        dispatch({ type: "EDIT_CLOSED_ORDER", payload: resp.data });
-        alert("ההזמנה עודכנה בהצלחה");
+        dispatch({
+          type: "EDIT_CLOSED_ORDER",
+          payload: resp.data.updatedOrder,
+        });
+        alert(resp.data.message);
         navigate("/closedOrders");
       }
     } catch (error) {

@@ -22,7 +22,7 @@ export default function CloseOrder() {
         const { closedOrder, removedProductIds } = resp.data;
         dispatch({ type: "CLOSE_ORDER", payload: closedOrder });
         dispatch({ type: "UPDATE_PRODUCTS", payload: { removedProductIds } }); //update products to available true
-        alert("ההזמנה נסגרה!");
+        alert(resp.data.message);
         navigate("/closedOrders");
       }
     } catch (error) {

@@ -35,7 +35,7 @@ const getTransactions = async (req, res, next) => {
 
     const allTransactions = await Transaction.find(filter).populate(
       "createdBy",
-      "nickName"
+      "nickName",
     ); // Populate the createdBy field with user details
     return res.status(200).json({ transactions: allTransactions });
   } catch (error) {
@@ -78,10 +78,13 @@ const addNewTransaction = async (req, res, next) => {
 
     // Populate the newly created transaction to include full user details
     const populatedTransaction = await Transaction.findById(
-      newTransaction._id
+      newTransaction._id,
     ).populate("createdBy", "nickName");
 
-    return res.status(201).json(populatedTransaction);
+    return res.status(201).json({
+      message: "הפעולה נוספה בהצלחה",
+      transaction: populatedTransaction,
+    });
   } catch (error) {
     next(error);
   }
@@ -116,10 +119,13 @@ const editTransaction = async (req, res, next) => {
 
     // Populate the updated transaction to include full user details
     const populatedTransaction = await Transaction.findById(
-      req.transaction._id
+      req.transaction._id,
     ).populate("createdBy", "nickName");
 
-    return res.status(200).json(populatedTransaction);
+    return res.status(200).json({
+      message: "הפעולה עודכנה בהצלחה",
+      transaction: populatedTransaction,
+    });
   } catch (error) {
     next(error);
   }

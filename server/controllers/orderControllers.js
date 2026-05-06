@@ -97,6 +97,7 @@ const addNewOrder = async (req, res, next) => {
     return res.status(201).json({
       newOrder: populatedOrder,
       addedProductIds: productIds,
+      message: "ההזמנה נוספה בהצלחה",
     });
   } catch (error) {
     next(error);
@@ -193,6 +194,7 @@ const editOrder = async (req, res, next) => {
       updatedOrder: populatedOrder,
       addedProductIds,
       removedProductIds,
+      message: "ההזמנה עודכנה בהצלחה",
     });
   } catch (error) {
     next(error);
@@ -253,9 +255,11 @@ const closeOrder = async (req, res, next) => {
       .populate("products.product")
       .populate("createdBy", "nickName");
 
-    return res
-      .status(200)
-      .json({ closedOrder: populatedOrder, removedProductIds: productIds });
+    return res.status(200).json({
+      closedOrder: populatedOrder,
+      removedProductIds: productIds,
+      message: "ההזמנה נסגרה בהצלחה",
+    });
   } catch (error) {
     next(error);
   }
@@ -301,7 +305,10 @@ const editClosedOrder = async (req, res, next) => {
       .populate("products.product")
       .populate("createdBy", "nickName");
 
-    return res.status(200).json(populatedClosedOrder);
+    return res.status(200).json({
+      message: "ההזמנה עודכנה בהצלחה",
+      updatedOrder: populatedClosedOrder,
+    });
   } catch (error) {
     next(error);
   }

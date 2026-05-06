@@ -22,8 +22,8 @@ export default function EditProduct() {
       setIsLoading(true);
       const resp = await api.epEditProduct(productData, params.id, token);
       if (resp.status === 200) {
-        dispatch({ type: "EDIT_PRODUCT", payload: resp.data });
-        alert("המוצר עודכן בהצלחה");
+        dispatch({ type: "EDIT_PRODUCT", payload: resp.data.product });
+        alert(resp.data.message);
         navigate("/products");
       }
     } catch (error) {

@@ -11,7 +11,7 @@ export default function EditCustomer() {
   const params = useParams(); //params.id => customerid
   const customers = useSelector((state) => state.customerReducer.customers);
   const customerToEdit = customers.find(
-    (customer) => customer._id === params.id
+    (customer) => customer._id === params.id,
   );
 
   const dispatch = useDispatch();
@@ -22,9 +22,12 @@ export default function EditCustomer() {
       setIsLoading(true);
       const resp = await api.epEditCustomer(customerData, params.id, token);
       if (resp.status === 200) {
-        dispatch({ type: "EDIT_CUSTOMER", payload: resp.data });
-        dispatch({ type: "UPDATE_ORDERS_WITH_CUSTOMER", payload: resp.data });
-        alert("הלקוח עודכן בהצלחה");
+        dispatch({ type: "EDIT_CUSTOMER", payload: resp.data.customer });
+        dispatch({
+          type: "UPDATE_ORDERS_WITH_CUSTOMER",
+          payload: resp.data.customer,
+        });
+        alert(resp.data.message);
         navigate("/customers");
       }
     } catch (error) {

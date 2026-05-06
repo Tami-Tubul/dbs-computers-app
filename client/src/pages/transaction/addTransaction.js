@@ -16,8 +16,8 @@ export default function AddTransaction() {
       setIsLoading(true);
       const resp = await api.epAddTransaction(transactionData, token);
       if (resp.status === 201) {
-        dispatch({ type: "ADD_TRANSACTION", payload: resp.data });
-        alert("הפעולה נוספה בהצלחה");
+        dispatch({ type: "ADD_TRANSACTION", payload: resp.data.transaction });
+        alert(resp.data.message);
         navigate("/transactions");
       }
     } catch (error) {

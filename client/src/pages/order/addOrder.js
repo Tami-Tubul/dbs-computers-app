@@ -22,7 +22,7 @@ export default function AddOrder() {
           type: "UPDATE_PRODUCTS",
           payload: { addedProductIds, orderId: newOrder._id },
         }); //update order products to available false
-        alert("ההזמנה נוספה בהצלחה");
+        alert(resp.data.message);
         navigate("/openOrders");
       }
     } catch (error) {

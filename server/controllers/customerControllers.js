@@ -29,7 +29,10 @@ const addNewCustomer = async (req, res, next) => {
     // Save the customer to the database
     await newCustomer.save();
 
-    return res.status(201).json(newCustomer);
+    return res.status(201).json({
+      message: "הלקוח נוסף בהצלחה",
+      customer: newCustomer,
+    });
   } catch (error) {
     next(error);
   }
@@ -54,14 +57,17 @@ const editCustomer = async (req, res, next) => {
     const updatedCustomer = await Customer.findByIdAndUpdate(
       customerid,
       { firstname, lastname, phone, email, address },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedCustomer) {
       return res.status(404).json({ message: "לקוח לא נמצא" });
     }
 
-    return res.status(200).json(updatedCustomer);
+    return res.status(200).json({
+      message: "הלקוח עודכן בהצלחה",
+      customer: updatedCustomer,
+    });
   } catch (error) {
     next(error);
   }
