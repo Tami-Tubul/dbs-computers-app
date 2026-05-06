@@ -130,6 +130,12 @@ const epEditCustomer = (updatedCustomer, customerId, token) => {
   );
 };
 
+const epDeleteCustomer = (customerId, token) => {
+  return axios.delete(`${baseURL}/customers/deleteCustomer/${customerId}`, {
+    headers: { "x-access-token": token },
+  });
+};
+
 const epGetTransactions = (token) => {
   return axios.get(`${baseURL}/transactions`, {
     headers: { "x-access-token": token },
@@ -191,6 +197,7 @@ const api = {
   epGetCustomers,
   epAddCustomer,
   epEditCustomer,
+  epDeleteCustomer,
   epGetTransactions,
   epAddTransaction,
   epEditTransaction,

@@ -2,9 +2,10 @@ import { Heading, HStack, Text, VStack, Box, Button } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { EditIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import DataTable from "./../../components/dataTable";
+import api from "../../services/api";
 
 export default function Customers() {
   const token = useSelector((state) => state.userReducer.token);
@@ -71,17 +72,27 @@ export default function Customers() {
 
       columnHelper.accessor("_id", {
         cell: (info) => {
-          // const handleDelete = async () => {
-          //     const confirmed = window.confirm("האם אתה בטוח שברצונך למחוק את הלקוח?");
-          //     if (confirmed) {
-          //         const resp = await api.epDeleteCustomer(info.getValue(), token);
-          //         const { message, removedProductIds } = resp.data;
-          //         if (resp.status === 200) {
-          //             dispatch({ type: "DELETE_CUSTOMER", payload: info.getValue() });
-          //             alert(message);
-          //         }
-          //     }
-          // };
+          const handleDelete = async () => {
+            const confirmed = window.confirm(
+              "האם אתה בטוח שברצונך למחוק את הלקוח?",
+            );
+            if (confirmed) {
+              try {
+                const resp = await api.epDeleteCustomer(info.getValue(), token);
+                const { message } = resp.data;
+                if (resp.status === 200) {
+                  dispatch({
+                    type: "DELETE_CUSTOMER",
+                    payload: info.getValue(),
+                  });
+                  alert(message);
+                }
+              } catch (error) {
+                if (error.response.status === 400)
+                  alert(error.response.data.message);
+              }
+            }
+          };
 
           return (
             <HStack justifyContent={"end"} gap={"20px"} flexWrap={"wrap"}>
@@ -92,13 +103,14 @@ export default function Customers() {
               >
                 <EditIcon w="22px" h="22px" color={"primary.dbsGoldenrod"} />
               </Link>
-              {/* <Button variant={"link"} onClick={handleDelete} title="מחק לקוח" aria-label="מחק לקוח">
-                                <DeleteIcon
-                                    w="22px"
-                                    h="22px"
-                                    color={"primary.error"}
-                                />
-                            </Button> */}
+              <Button
+                variant={"link"}
+                onClick={handleDelete}
+                title="מחק לקוח"
+                aria-label="מחק לקוח"
+              >
+                <DeleteIcon w="22px" h="22px" color={"primary.error"} />
+              </Button>
             </HStack>
           );
         },

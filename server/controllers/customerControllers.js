@@ -1,4 +1,5 @@
 const Customer = require("../models/customerModel");
+const Order = require("../models/orderModel");
 
 const getCustomers = async (req, res, next) => {
   try {
@@ -73,4 +74,30 @@ const editCustomer = async (req, res, next) => {
   }
 };
 
-module.exports = { getCustomers, addNewCustomer, editCustomer };
+const deleteCustomer = async (req, res, next) => {
+  try {
+    const customerId = req.params.id;
+
+    const existingOrders = await Order.exists({ customer: customerId });
+
+    if (existingOrders) {
+      return res.status(400).json({
+        message: "לא ניתן למחוק לקוח שמשוייכות אליו הזמנות במערכת",
+      });
+    }
+
+    const deletedCustomer = await Customer.findByIdAndDelete(customerId);
+
+    if (!deletedCustomer) {
+      return res.status(404).json({ message: "לקוח לא נמצא" });
+    }
+
+    return res.status(200).json({
+      message: "הלקוח נמחק בהצלחה",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getCustomers, addNewCustomer, editCustomer, deleteCustomer };

@@ -14,9 +14,18 @@ export const customerReducer = (state = { customers: [] }, action) => {
       return {
         ...state,
         customers: state.customers.map((customer) =>
-          customer._id === action.payload._id ? action.payload : customer
+          customer._id === action.payload._id ? action.payload : customer,
         ),
       };
+
+    case "DELETE_CUSTOMER":
+      return {
+        ...state,
+        customers: state.customers.filter(
+          (customer) => customer._id !== action.payload,
+        ),
+      };
+
     default:
       return state;
   }
