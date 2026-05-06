@@ -101,6 +101,7 @@ export default function Products() {
         },
         header: () => "סטטוס",
         enableSorting: true,
+        enableFiltering: true,
       }),
 
       columnHelper.accessor("specification", {
