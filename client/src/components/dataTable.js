@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   Thead,
@@ -30,7 +30,6 @@ import {
   timeFormat,
 } from "./../utils/formatDate";
 import calculateDaysSince from "../utils/calculateDaysSince";
-import { useDeepCompareMemo } from "use-deep-compare";
 
 import {
   useReactTable,
@@ -58,64 +57,27 @@ function DataTable({
   renderRowSubComponent,
 }) {
   const [sorting, setSorting] = useState([]);
-  const [filters, setFilters] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
   const [inputValues, setInputValues] = useState({});
-
-  //Render the table only when the content of originalData changes and not the address in memory
-  const memoizedOriginalData = useDeepCompareMemo(
-    () => originalData,
-    [originalData]
-  );
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: pageSize ?? 10,
   });
 
-  const table = useReactTable({
-    columns,
-    data,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onPaginationChange: setPagination,
+  const smartFilter = (row, columnId, value) => {
+    const item = row.original;
+    const field = item[columnId];
+    const searchValue = value?.toString().trim();
 
-    debugTable: false,
-    state: {
-      sorting,
-      globalFilter,
-      pagination,
-    },
-  });
+    if (!searchValue) return true;
 
-  const handleFilter = (colHeader, searchValue) => {
-    if (searchValue && searchValue !== "") {
-      //remove spaces
-      const trimmedValue = searchValue.trim();
-
-      // Adding the new filter to the filters array
-      setFilters((prevFilters) => {
-        const updatedFilters = prevFilters.filter(
-          (filter) => !Object.prototype.hasOwnProperty.call(filter, colHeader)
-        );
-        updatedFilters.push({ [colHeader]: trimmedValue });
-        return updatedFilters;
-      });
-    }
-  };
-
-  // filter data
-  const getFilteredData = () => {
-    const searchValueToLower = (searchValue) => searchValue.toLowerCase();
+    const includes = (v) =>
+      v?.toString().toLowerCase().includes(searchValue.toLowerCase());
 
     const getCombinedCustomerFields = (field) => {
       if (!field) return { fullName: "", phone: "" };
-      const fullName = `${(field.firstname || "").trim()} ${(
-        field.lastname || ""
-      ).trim()}`;
+      const fullName = `${(field.firstname || "").trim()} ${(field.lastname || "").trim()}`;
       const phone = `${(field.phone || "").trim()}`;
       return { fullName, phone };
     };
@@ -126,6 +88,7 @@ function DataTable({
       const stringProducts =
         field?.map((p) => p.product?.productName?.trim() || "").join(", ") ||
         "";
+
       const mouseText =
         row.mouseQuantity > 0 ? `עכבר*${row.mouseQuantity}` : "";
 
@@ -158,81 +121,98 @@ function DataTable({
       return calculateDaysSince(field);
     };
 
-    const filterData = originalData?.filter((item) =>
-      filters.every((filterObj) => {
-        const [colHeader, searchValue] = Object.entries(filterObj)[0];
-        const field = item[colHeader];
-        // const searchValueLower = searchValueToLower(searchValue);
+    switch (columnId) {
+      case "customer": {
+        const { fullName, phone } = getCombinedCustomerFields(field);
+        return includes(fullName) || includes(phone);
+      }
 
-        switch (colHeader) {
-          case "customer": {
-            const { fullName, phone } = getCombinedCustomerFields(field);
-            return (
-              fullName.includes(searchValue) || phone.includes(searchValue)
-            );
-          }
-          case "fullname": {
-            // Calculated column
-            const fullNameCombined = `${(item.firstname || "").trim()} ${(
-              item.lastname || ""
-            ).trim()}`;
-            return fullNameCombined.includes(searchValue);
-          }
-          case "products":
-            return getCombineProducts(field, item).includes(searchValue);
+      case "fullname": {
+        const fullNameCombined = `${(item.firstname || "").trim()} ${(item.lastname || "").trim()}`;
+        return includes(fullNameCombined);
+      }
 
-          case "orderDate":
-          case "closeDate":
-          case "transactionDate":
-            return getCombinedDate(field).includes(searchValue);
+      case "products":
+        return includes(getCombineProducts(field, item));
 
-          case "delivery":
-            return getDeliveryText(field).includes(searchValue);
+      case "orderDate":
+      case "closeDate":
+      case "transactionDate":
+        return includes(getCombinedDate(field));
 
-          case "orderPrice":
-          case "remainingPrice":
-          case "amount":
-            return Number(field) === Number(searchValue);
+      case "delivery":
+        return includes(getDeliveryText(field));
 
-          case "daysInUse": // Calculated column
-            return (
-              Number(getCombinedDaysInUse(item.orderDate)) ===
-              Number(searchValue)
-            );
+      case "orderPrice":
+      case "remainingPrice":
+      case "amount":
+        return Number(field) === Number(searchValue);
 
-          case "createdBy": {
-            const creator = field; // object
-            return (creator?.nickName || "")
-              .toLowerCase()
-              .includes(searchValue.toLowerCase());
-          }
-          default:
-            return (
-              field
-                ?.toString()
-                .toLowerCase()
-                .includes(searchValue.toLowerCase()) || false
-            );
-        }
-      })
-    );
+      case "daysInUse":
+        return (
+          Number(getCombinedDaysInUse(item.orderDate)) === Number(searchValue)
+        );
 
-    filteredData(filterData);
+      case "createdBy":
+        return includes(field?.nickName || "");
+
+      case "displayStatus": {
+        const status =
+          item.status !== "פעיל"
+            ? item.status
+            : item.available
+              ? "פנוי"
+              : "תפוס";
+
+        return includes(status);
+      }
+
+      case "softwares": {
+        const softwares = item?.computerDetails?.softwares?.join(", ") || "";
+        return includes(softwares);
+      }
+
+      default:
+        return includes(field);
+    }
   };
 
-  // clear this filter
+  const table = useReactTable({
+    columns: columns.map((col) => ({
+      ...col,
+      filterFn: "smart",
+    })),
+    data,
+    filterFns: {
+      smart: smartFilter,
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      pagination,
+    },
+  });
+
+  const handleFilter = (colHeader, value) => {
+    table.getColumn(colHeader)?.setFilterValue(value);
+  };
+
   const clearFilter = (colHeader) => {
-    setFilters((prevFilters) =>
-      prevFilters.filter(
-        (filter) => !Object.prototype.hasOwnProperty.call(filter, colHeader)
-      )
-    );
+    table.getColumn(colHeader)?.setFilterValue("");
+    setInputValues((prev) => ({
+      ...prev,
+      [colHeader]: "",
+    }));
   };
-
-  // useEffect that will update the filtered data when the filters change
-  useEffect(() => {
-    getFilteredData();
-  }, [filters, memoizedOriginalData]);
 
   return (
     <VStack w="100%" gap="32px">
@@ -263,7 +243,7 @@ function DataTable({
                     >
                       {flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                       {header.column.columnDef.enableSorting && (
                         <chakra.span w="fit-content">
@@ -287,11 +267,9 @@ function DataTable({
                                 >
                                   <Image
                                     src={
-                                      filters.some((filter) =>
-                                        Object.keys(filter).includes(
-                                          header.column.id
-                                        )
-                                      )
+                                      table
+                                        .getColumn(header.column.id)
+                                        ?.getIsFiltered()
                                         ? "/assets/icons/filter_selected.svg"
                                         : "/assets/icons/filter.svg"
                                     }
@@ -358,7 +336,7 @@ function DataTable({
                                       onClick={() => {
                                         handleFilter(
                                           header.column.id,
-                                          inputValues[header.column.id]
+                                          inputValues[header.column.id],
                                         );
                                         onClose(); // Close the popover
                                       }}
@@ -410,7 +388,7 @@ function DataTable({
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </Td>
                       );

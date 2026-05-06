@@ -36,12 +36,11 @@ export default function Transactions() {
 
   const users = useSelector((state) => state.userReducer.users);
   const transactions = useSelector(
-    (state) => state.transactionReducer.transactions
+    (state) => state.transactionReducer.transactions,
   );
   const orders = useSelector((state) => state.orderReducer.orders);
 
   // const [selectedRow, setSelectedRow] = useState(null);
-  const [filterTransactions, setFilterTransactions] = useState(null);
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedUser, setSelectedUser] = useState("all");
@@ -141,7 +140,7 @@ export default function Transactions() {
 
   const effectiveUser = isAdmin ? selectedUser : currentUser.userId;
   const sortedTransactions = [...transactions].sort(
-    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
   );
 
   // Filter transactions based on selected user (if admin) or show own transactions (if not admin)
@@ -154,7 +153,7 @@ export default function Transactions() {
   const chartData = useMemo(
     () =>
       calculateMonthlyData(transactions, orders, selectedYear, effectiveUser),
-    [transactions, orders, selectedYear, effectiveUser]
+    [transactions, orders, selectedYear, effectiveUser],
   );
 
   const columnHelper = createColumnHelper();
@@ -252,12 +251,12 @@ export default function Transactions() {
         cell: (info) => {
           const handleDelete = async () => {
             const confirmed = window.confirm(
-              "האם אתה בטוח שברצונך למחוק את הפעולה?"
+              "האם אתה בטוח שברצונך למחוק את הפעולה?",
             );
             if (confirmed) {
               const resp = await api.epDeleteTransaction(
                 info.getValue(),
-                token
+                token,
               );
               const { message } = resp.data;
               if (resp.status === 200) {
@@ -272,12 +271,12 @@ export default function Transactions() {
 
           const handleStop = async () => {
             const confirmed = window.confirm(
-              `האם אתה בטוח שברצונך לסיים את ה${info.row.original.transactionName} הקבועה?`
+              `האם אתה בטוח שברצונך לסיים את ה${info.row.original.transactionName} הקבועה?`,
             );
             if (confirmed) {
               const resp = await api.epFinishTransaction(
                 info.getValue(),
-                token
+                token,
               );
               const { message } = resp.data;
               if (resp.status === 200) {
@@ -490,15 +489,11 @@ export default function Transactions() {
           // selectedRow={selectedRow}
           // onRowClick={onRowClick}
           columns={columns}
-          originalData={displayedTransactions}
-          data={
-            !filterTransactions ? displayedTransactions : filterTransactions
-          }
+          data={displayedTransactions}
           variant={"orders"}
           scroll={true}
           pageSize={8}
-          filteredData={(newData) => setFilterTransactions(newData)}
-          isLoading={!transactions || transactions.length === 0}
+          isLoading={!transactions?.length}
         />
       </Box>
     </VStack>

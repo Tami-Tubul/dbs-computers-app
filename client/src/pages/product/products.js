@@ -12,7 +12,6 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,7 +28,6 @@ export default function Products() {
   const productsByCategory = useSelector(
     (state) => state.productReducer.products,
   );
-  const [filtersByCategory, setFiltersByCategory] = useState({});
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
@@ -115,19 +113,18 @@ export default function Products() {
 
       ...(category === "מחשבים"
         ? [
-            columnHelper.accessor("computerDetails.softwares", {
-              cell: (info) => {
-                const softwares = info.getValue();
-                return (
-                  <Text variant={"runningText"}>
-                    {info.getValue()?.join(", ") || "-"}
-                  </Text>
-                );
+            columnHelper.accessor(
+              (row) => row?.computerDetails?.softwares?.join(", ") || "",
+              {
+                id: "softwares",
+                cell: (info) => (
+                  <Text variant="runningText">{info.getValue() || "-"}</Text>
+                ),
+                header: () => "תוכנות",
+                enableSorting: true,
+                enableFiltering: true,
               },
-              header: () => "תוכנות",
-              enableSorting: true,
-              enableFiltering: true,
-            }),
+            ),
           ]
         : []),
 
@@ -248,22 +245,11 @@ export default function Products() {
                   // selectedRow={selectedRow}
                   // onRowClick={onRowClick}
                   columns={getColumns(cat.category)}
-                  originalData={cat.list}
-                  data={
-                    filtersByCategory[cat.category]?.length
-                      ? filtersByCategory[cat.category]
-                      : cat.list
-                  }
+                  data={cat.list}
                   variant={"orders"}
                   scroll={true}
                   pageSize={10}
-                  filteredData={(newData) =>
-                    setFiltersByCategory((prev) => ({
-                      ...prev,
-                      [cat.category]: newData,
-                    }))
-                  }
-                  isLoading={!cat.list}
+                  isLoading={!cat.list?.length}
                 />
               </TabPanel>
             ))}

@@ -6,7 +6,7 @@ import {
   timeFormat,
 } from "../../utils/formatDate";
 import calculateDaysSince from "../../utils/calculateDaysSince";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeleteIcon, EditIcon, LockIcon, StarIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -26,7 +26,7 @@ export default function OpenOrders() {
   const orders = useSelector((state) => state.orderReducer.orders).filter(
     (o) => o.orderStatus === "פתוחה",
   );
-  const [filterOrders, setFilterOrders] = useState(null);
+
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
@@ -197,7 +197,7 @@ export default function OpenOrders() {
         header: () => "",
       }),
     ];
-  }, [sortedOrders]);
+  }, []);
 
   // const onRowClick = (row) => {
   //     setSelectedRow(row);
@@ -221,15 +221,11 @@ export default function OpenOrders() {
           // selectedRow={selectedRow}
           // onRowClick={onRowClick}
           columns={columns}
-          originalData={sortedOrders}
-          data={!filterOrders ? sortedOrders : filterOrders}
+          data={sortedOrders}
           variant={"orders"}
           scroll={true}
           pageSize={8}
-          filteredData={(newData) => setFilterOrders(newData)}
-          isLoading={
-            !sortedOrders || sortedOrders.length === 0 || !filterOrders
-          }
+          isLoading={!sortedOrders?.length}
         />
       </Box>
     </VStack>

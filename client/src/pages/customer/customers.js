@@ -1,6 +1,6 @@
 import { Heading, HStack, Text, VStack, Box, Button } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,7 +13,6 @@ export default function Customers() {
   const sortedCustomers = [...customers].sort(
     (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
   );
-  const [filterCustomers, setFilterCustomers] = useState(null);
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
@@ -117,7 +116,7 @@ export default function Customers() {
         header: () => "",
       }),
     ];
-  }, [sortedCustomers]);
+  }, []);
 
   // const onRowClick = (row) => {
   //     setSelectedRow(row);
@@ -152,15 +151,11 @@ export default function Customers() {
           // selectedRow={selectedRow}
           // onRowClick={onRowClick}
           columns={columns}
-          originalData={sortedCustomers}
-          data={!filterCustomers ? sortedCustomers : filterCustomers}
+          data={sortedCustomers}
           variant={"orders"}
           scroll={true}
           pageSize={8}
-          filteredData={(newData) => setFilterCustomers(newData)}
-          isLoading={
-            !sortedCustomers || sortedCustomers.length === 0 || !filterCustomers
-          }
+          isLoading={!sortedCustomers?.length}
         />
       </Box>
     </VStack>

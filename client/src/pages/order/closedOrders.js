@@ -1,6 +1,6 @@
 import { Heading, HStack, Text, VStack, Box, Button } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { EditIcon, StarIcon, UnlockIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -25,7 +25,6 @@ export default function ClosedOrders() {
   const orders = useSelector((state) => state.orderReducer.orders).filter(
     (o) => o.orderStatus === "סגורה",
   );
-  const [filterOrders, setFilterOrders] = useState(null);
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
@@ -245,7 +244,7 @@ export default function ClosedOrders() {
         header: () => "",
       }),
     ];
-  }, [sortedOrders]);
+  }, []);
 
   // const onRowClick = (row) => {
   //     setSelectedRow(row);
@@ -269,15 +268,11 @@ export default function ClosedOrders() {
           // selectedRow={selectedRow}
           // onRowClick={onRowClick}
           columns={columns}
-          originalData={sortedOrders}
-          data={!filterOrders ? sortedOrders : filterOrders}
+          data={sortedOrders}
           variant={"orders"}
           scroll={true}
           pageSize={8}
-          filteredData={(newData) => setFilterOrders(newData)}
-          isLoading={
-            !sortedOrders || sortedOrders.length === 0 || !filterOrders
-          }
+          isLoading={!sortedOrders?.length}
         />
       </Box>
     </VStack>
