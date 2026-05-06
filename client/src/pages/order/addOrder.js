@@ -28,10 +28,7 @@ export default function AddOrder() {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.status === 400) {
-        const unavailableProducts = error.response.data.unavailableProducts
-          .map((prod) => prod.productName)
-          .join(", ");
-        alert("המוצרים: " + unavailableProducts + " תפוסים בהזמנה אחרת");
+        alert(error.response.data.message);
       }
     } finally {
       setIsLoading(false);

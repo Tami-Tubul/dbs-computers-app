@@ -8,6 +8,30 @@ const convertToDateWithTimeZone = (dateString) => {
   return moment.tz(dateString, timeZone).toDate();
 };
 
+// Check if any of the products in the order are unavailable (either not available or not active)
+const checkProductsAvailability = async (productIds) => {
+  if (!productIds || productIds.length === 0) return null;
+
+  const problematicProducts = await Product.find({
+    _id: { $in: productIds },
+    $or: [{ available: false }, { status: { $ne: "פעיל" } }],
+  });
+
+  if (problematicProducts.length > 0) {
+    const details = problematicProducts
+      .map((p) => `- ${p.productName} (${p.available ? p.status : "תפוס"})`)
+      .join("\n");
+
+    return {
+      error: true,
+      message: `המוצרים הבאים אינם זמינים:\n${details}`,
+      list: problematicProducts,
+    };
+  }
+
+  return null;
+};
+
 const getOrders = async (req, res, next) => {
   try {
     const allOrders = await Order.find({})
@@ -48,22 +72,18 @@ const addNewOrder = async (req, res, next) => {
 
     const productIds = products.map((p) => p.product);
 
-    //Check if the products exist in another order
-    const unavailableProducts = await Product.find({
-      _id: { $in: productIds },
-      available: false,
-    });
-    if (unavailableProducts.length > 0) {
+    const check = await checkProductsAvailability(productIds);
+    if (check) {
       return res.status(400).json({
-        message: "חלק מהמוצרים תפוסים",
-        unavailableProducts: unavailableProducts,
+        message: check.message,
+        unavailableProducts: check.list,
       });
     }
 
     // Update the 'available' field for the ordered products
     await Product.updateMany(
       { _id: { $in: productIds } }, // Find products where the _id is in the array of productIds
-      { $set: { available: false } } // Set 'available' to false
+      { $set: { available: false } }, // Set 'available' to false
     );
 
     await newOrder.save();
@@ -101,32 +121,42 @@ const editOrder = async (req, res, next) => {
 
     //original products before edit
     const currentProductIds = existingOrder.products.map((p) =>
-      p.product.toString()
+      p.product.toString(),
     );
 
     const newProductIds = products.map((p) => p.product);
 
     //removed products
     const removedProductIds = currentProductIds.filter(
-      (id) => !newProductIds.includes(id)
+      (id) => !newProductIds.includes(id),
     );
 
     //new products
     const addedProductIds = newProductIds.filter(
-      (id) => !currentProductIds.includes(id)
+      (id) => !currentProductIds.includes(id),
     );
+
+    if (addedProductIds.length > 0) {
+      const check = await checkProductsAvailability(addedProductIds);
+      if (check) {
+        return res.status(400).json({
+          message: `בעיה במוצרים החדשים.\n${check.message}`,
+          unavailableProducts: check.list,
+        });
+      }
+    }
 
     if (removedProductIds.length > 0) {
       await Product.updateMany(
         { _id: { $in: removedProductIds } },
-        { $set: { available: true } }
+        { $set: { available: true } },
       );
     }
 
     if (addedProductIds.length > 0) {
       await Product.updateMany(
         { _id: { $in: addedProductIds } },
-        { $set: { available: false } }
+        { $set: { available: false } },
       );
     }
 
@@ -134,7 +164,7 @@ const editOrder = async (req, res, next) => {
     const priceDifference = (orderPrice || 0) - existingOrder.orderPrice;
     existingOrder.payments = updatePaymentsOnPriceChange(
       existingOrder.payments,
-      priceDifference
+      priceDifference,
     );
 
     //update other fields
@@ -187,7 +217,7 @@ const closeOrder = async (req, res, next) => {
     if (productIds.length > 0) {
       await Product.updateMany(
         { _id: { $in: productIds } },
-        { $set: { available: true } }
+        { $set: { available: true } },
       );
     }
 
@@ -197,7 +227,7 @@ const closeOrder = async (req, res, next) => {
     const priceDifference = (orderPrice || 0) - orderToClose.orderPrice;
     orderToClose.payments = updatePaymentsOnPriceChange(
       orderToClose.payments,
-      priceDifference
+      priceDifference,
     );
 
     // Update other fields
@@ -246,7 +276,7 @@ const editClosedOrder = async (req, res, next) => {
     const priceDifference = (orderPrice || 0) - existingOrder.orderPrice;
     existingOrder.payments = updatePaymentsOnPriceChange(
       existingOrder.payments,
-      priceDifference
+      priceDifference,
     );
 
     //update other fields
@@ -294,7 +324,7 @@ const deleteOrder = async (req, res, next) => {
     if (productIds.length > 0) {
       await Product.updateMany(
         { _id: { $in: productIds } },
-        { $set: { available: true } }
+        { $set: { available: true } },
       );
     }
 
@@ -328,24 +358,18 @@ const reopenOrder = async (req, res, next) => {
 
     const productIds = order.products.map((p) => p.product);
 
-    // Check if any of the products are unavailable (i.e., already used in another open order)
-    const unavailableProducts = await Product.find({
-      _id: { $in: productIds },
-      available: false,
-    });
-
-    if (unavailableProducts.length > 0) {
+    const check = await checkProductsAvailability(productIds);
+    if (check) {
       return res.status(400).json({
-        message:
-          "לא ניתן לפתוח את ההזמנה מחדש, כיוון שאחד או יותר מהמוצרים הכלולים בה תפוסים בהזמנה אחרת. יש לשחררם לפני פתיחה מחדש.",
-        unavailableProducts,
+        message: `לא ניתן לפתוח את ההזמנה מחדש.\n${check.message}`,
+        unavailableProducts: check.list,
       });
     }
 
     // Mark products as unavailable (taken)
     await Product.updateMany(
       { _id: { $in: productIds } },
-      { $set: { available: false } }
+      { $set: { available: false } },
     );
 
     // Update the order status

@@ -132,6 +132,15 @@ const editProduct = async (req, res, next) => {
       "products.product": productId,
     });
 
+    if (updates.status && updates.status !== "פעיל") {
+      if (product.available === false) {
+        return res.status(400).json({
+          message:
+            "לא ניתן לשנות סטטוס למוצר שנמצא כרגע בהזמנה פתוחה. יש לסגור את ההזמנה או להסיר את המוצר ממנה תחילה.",
+        });
+      }
+    }
+
     if (isUsed) {
       if (updates.productName && updates.productName !== product.productName) {
         return res.status(400).json({

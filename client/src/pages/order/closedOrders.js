@@ -210,17 +210,7 @@ export default function ClosedOrders() {
               navigate("/openOrders");
             } catch (error) {
               if (error.response && error.response.status === 400) {
-                const { message, unavailableProducts } = error.response.data;
-                let fullMessage = message;
-
-                if (unavailableProducts && unavailableProducts.length > 0) {
-                  const productNames = unavailableProducts
-                    .map((p) => p.product?.productName)
-                    .join(", ");
-                  fullMessage += `\nהמוצרים הם: ${productNames}`;
-                }
-
-                alert(fullMessage);
+                alert(error.response.data.message);
               }
             }
           };

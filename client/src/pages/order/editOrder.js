@@ -34,6 +34,9 @@ export default function EditOrder() {
       }
     } catch (error) {
       console.error(error);
+      if (error.response && error.response.status === 400) {
+        alert(error.response.data.message);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -19,6 +19,11 @@ import { Link, useNavigate } from "react-router-dom";
 import DataTable from "./../../components/dataTable";
 import api from "../../services/api";
 
+export const getDisplayStatus = (product) => {
+  if (product.status !== "פעיל") return product.status; // "תקול" / "מושהה" / "נמכר"
+  return product.available ? "פנוי" : "תפוס";
+};
+
 export default function Products() {
   const token = useSelector((state) => state.userReducer.token);
   const productsByCategory = useSelector(
@@ -53,27 +58,51 @@ export default function Products() {
         enableFiltering: true,
       }),
 
-      columnHelper.accessor("status", {
-        cell: (info) => {
-          return <Text variant="runningText">{info.getValue() || "-"}</Text>;
-        },
-        header: () => "סטטוס",
-        enableSorting: true,
-        enableFiltering: true,
-      }),
+      // columnHelper.accessor("status", {
+      //   cell: (info) => {
+      //     return <Text variant="runningText">{info.getValue() || "-"}</Text>;
+      //   },
+      //   header: () => "סטטוס",
+      //   enableSorting: true,
+      //   enableFiltering: true,
+      // }),
 
-      columnHelper.accessor("available", {
+      // columnHelper.accessor("available", {
+      //   cell: (info) => {
+      //     return (
+      //       <Text variant={"runningText"}>
+      //         {info.getValue() ? "פנוי" : "תפוס"}
+      //       </Text>
+      //     );
+      //   },
+      //   header: () => "זמינות",
+      //   enableSorting: true,
+      //   enableFiltering: true,
+      // }),
+
+      columnHelper.accessor((row) => getDisplayStatus(row), {
+        id: "displayStatus",
         cell: (info) => {
+          const status = info.getValue();
+          const color =
+            status === "פנוי"
+              ? "green"
+              : status === "תפוס"
+                ? "red"
+                : status === "תקול"
+                  ? "orange"
+                  : "gray";
+
           return (
-            <Text variant={"runningText"}>
-              {info.getValue() ? "פנוי" : "תפוס"}
+            <Text variant="runningText" color={color} fontWeight="bold">
+              {status}
             </Text>
           );
         },
-        header: () => "זמינות",
+        header: () => "סטטוס",
         enableSorting: true,
-        enableFiltering: true,
       }),
+
       columnHelper.accessor("specification", {
         cell: (info) => {
           return <Text variant={"runningText"}>{info.getValue()}</Text>;
