@@ -1,4 +1,5 @@
 const Product = require("../models/productModel");
+const Order = require("../models/orderModel");
 
 // sort products
 const naturalSort = (a, b) => {
@@ -24,16 +25,36 @@ const getProducts = async (req, res, next) => {
   try {
     const allProducts = await Product.find({});
 
-    //sort products by productName
+    const activeOrders = await Order.find({
+      orderStatus: { $ne: "סגורה" },
+    });
+
+    const productToOrderMap = new Map();
+
+    activeOrders.forEach((order) => {
+      order.products.forEach((p) => {
+        productToOrderMap.set(String(p.product), order);
+      });
+    });
+
+    // sort products by productName
     allProducts.sort((a, b) => naturalSort(a.productName, b.productName));
 
-    // sort products by categories
+    // sort products by categories + currentOrder
     const productsByCategory = allProducts.reduce((acc, product) => {
       const category = product.category;
+
       if (!acc[category]) {
         acc[category] = [];
       }
-      acc[category].push(product);
+
+      const order = productToOrderMap.get(String(product._id));
+
+      acc[category].push({
+        ...product.toObject(),
+        currentOrder: order ? order._id : null,
+      });
+
       return acc;
     }, {});
 
@@ -70,4 +91,100 @@ const getCategories = async (req, res, next) => {
   }
 };
 
-module.exports = { getProducts, getProductsByCategory, getCategories };
+const addNewProduct = async (req, res, next) => {
+  try {
+    let { productName, category, ...rest } = req.body;
+
+    productName = productName.trim();
+
+    const existingProduct = await Product.findOne({ productName });
+
+    if (existingProduct) {
+      return res.status(400).json({
+        message: "כבר קיים מוצר עם שם זה",
+      });
+    }
+
+    const newProduct = await Product.create({
+      productName,
+      category,
+      ...rest,
+    });
+
+    return res.status(201).json(newProduct);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const editProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    const updates = req.body;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "מוצר לא נמצא" });
+    }
+
+    const isUsed = await Order.exists({
+      "products.product": productId,
+    });
+
+    if (isUsed) {
+      if (updates.productName && updates.productName !== product.productName) {
+        return res.status(400).json({
+          message: "לא ניתן לשנות שם מוצר שקיים בהזמנה",
+        });
+      }
+
+      if (updates.category && updates.category !== product.category) {
+        return res.status(400).json({
+          message: "לא ניתן לשנות קטגוריה של מוצר שקיים בהזמנה",
+        });
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updates, {
+      new: true,
+    });
+
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteProduct = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+
+    const isUsed = await Order.exists({
+      "products.product": productId,
+    });
+
+    if (isUsed) {
+      return res.status(400).json({
+        message: "לא ניתן למחוק מוצר שקיים בהזמנה",
+      });
+    }
+
+    await Product.findByIdAndDelete(productId);
+
+    return res.status(200).json({
+      message: "המוצר נמחק בהצלחה",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getProducts,
+  getProductsByCategory,
+  getCategories,
+  addNewProduct,
+  editProduct,
+  deleteProduct,
+};

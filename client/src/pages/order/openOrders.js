@@ -24,7 +24,7 @@ const customProductSort = (a, b) => {
 export default function OpenOrders() {
   const token = useSelector((state) => state.userReducer.token);
   const orders = useSelector((state) => state.orderReducer.orders).filter(
-    (o) => o.orderStatus === "פתוחה"
+    (o) => o.orderStatus === "פתוחה",
   );
   const [filterOrders, setFilterOrders] = useState(null);
   // const [selectedRow, setSelectedRow] = useState(null);
@@ -151,7 +151,7 @@ export default function OpenOrders() {
         cell: (info) => {
           const handleDelete = async () => {
             const confirmed = window.confirm(
-              "האם אתה בטוח שברצונך למחוק את ההזמנה?"
+              "האם אתה בטוח שברצונך למחוק את ההזמנה?",
             );
             if (confirmed) {
               const resp = await api.epDeleteOrder(info.getValue(), token);

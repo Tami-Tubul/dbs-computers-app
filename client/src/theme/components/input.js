@@ -24,13 +24,13 @@ const baseStyle = definePartsStyle({
     _hover: {
       "::placeholder": {},
     },
-    // _disabled: {
-    //   bgColor: "rgba(151, 168, 191, 0.20)",
-    //   color: "primary.grayBlue",
-    //   "::placeholder": {
-    //     color: "primary.grayBlue",
-    //   },
-    // },
+    _disabled: {
+      bgColor: "white",
+      // color: "primary.grayBlue",
+      // "::placeholder": {
+      //   color: "primary.grayBlue",
+      // },
+    },
     _active: {},
     _invalid: {
       borderColor: "primary.error",

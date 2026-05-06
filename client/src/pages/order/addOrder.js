@@ -20,7 +20,7 @@ export default function AddOrder() {
         dispatch({ type: "ADD_ORDER", payload: newOrder });
         dispatch({
           type: "UPDATE_PRODUCTS",
-          payload: { addedProductIds },
+          payload: { addedProductIds, orderId: newOrder._id },
         }); //update order products to available false
         alert("ההזמנה נוספה בהצלחה");
         navigate("/openOrders");

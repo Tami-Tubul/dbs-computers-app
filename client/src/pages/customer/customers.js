@@ -10,9 +10,9 @@ export default function Customers() {
   const token = useSelector((state) => state.userReducer.token);
   const customers = useSelector((state) => state.customerReducer.customers);
   const sortedCustomers = [...customers].sort(
-    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
   );
-  const [filterOrders, setFilterOrders] = useState(null);
+  const [filterCustomers, setFilterCustomers] = useState(null);
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
@@ -78,7 +78,6 @@ export default function Customers() {
           //         const { message, removedProductIds } = resp.data;
           //         if (resp.status === 200) {
           //             dispatch({ type: "DELETE_CUSTOMER", payload: info.getValue() });
-          //             dispatch({ type: "UPDATE_PRODUCTS", payload: { removedProductIds } }); //update order products to available true
           //             alert(message);
           //         }
           //     }
@@ -142,13 +141,13 @@ export default function Customers() {
           // onRowClick={onRowClick}
           columns={columns}
           originalData={sortedCustomers}
-          data={!filterOrders ? sortedCustomers : filterOrders}
+          data={!filterCustomers ? sortedCustomers : filterCustomers}
           variant={"orders"}
           scroll={true}
           pageSize={8}
-          filteredData={(newData) => setFilterOrders(newData)}
+          filteredData={(newData) => setFilterCustomers(newData)}
           isLoading={
-            !sortedCustomers || sortedCustomers.length === 0 || !filterOrders
+            !sortedCustomers || sortedCustomers.length === 0 || !filterCustomers
           }
         />
       </Box>

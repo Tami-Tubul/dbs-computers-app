@@ -23,7 +23,11 @@ export default function EditOrder() {
         dispatch({ type: "EDIT_ORDER", payload: updatedOrder });
         dispatch({
           type: "UPDATE_PRODUCTS",
-          payload: { addedProductIds, removedProductIds },
+          payload: {
+            addedProductIds,
+            removedProductIds,
+            orderId: updatedOrder._id,
+          },
         }); //update products to available true/false
         alert("ההזמנה עודכנה בהצלחה");
         navigate("/openOrders");

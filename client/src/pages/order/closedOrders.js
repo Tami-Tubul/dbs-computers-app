@@ -23,7 +23,7 @@ const customProductSort = (a, b) => {
 export default function ClosedOrders() {
   const token = useSelector((state) => state.userReducer.token);
   const orders = useSelector((state) => state.orderReducer.orders).filter(
-    (o) => o.orderStatus === "סגורה"
+    (o) => o.orderStatus === "סגורה",
   );
   const [filterOrders, setFilterOrders] = useState(null);
   // const [selectedRow, setSelectedRow] = useState(null);
@@ -190,7 +190,7 @@ export default function ClosedOrders() {
 
           const handleReopen = async () => {
             const confirmed = window.confirm(
-              "האם אתה בטוח שברצונך לפתוח את ההזמנה מחדש?"
+              "האם אתה בטוח שברצונך לפתוח את ההזמנה מחדש?",
             );
             if (!confirmed) return;
 
@@ -201,7 +201,10 @@ export default function ClosedOrders() {
               dispatch({ type: "REOPEN_ORDER", payload: reopenedOrder });
               dispatch({
                 type: "UPDATE_PRODUCTS",
-                payload: { addedProductIds: affectedProducts },
+                payload: {
+                  addedProductIds: affectedProducts,
+                  orderId: reopenedOrder._id,
+                },
               });
               alert(message);
               navigate("/openOrders");

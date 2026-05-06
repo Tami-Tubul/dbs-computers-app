@@ -97,14 +97,9 @@ export default function Navigation() {
           </Text>
         </HStack>
       </Link>
-      {/* <Link to={"/products"}>
+      <Link to={"/products"}>
         <HStack>
-          <Image
-            src=""
-            alt=""
-            width={28}
-            height={28}
-          />
+          {/* <Image src="" alt="" width={28} height={28} /> */}
           <Text
             variant="runningTextSb"
             as="span"
@@ -118,7 +113,7 @@ export default function Navigation() {
             מוצרים
           </Text>
         </HStack>
-      </Link> */}
+      </Link>
       <Link to={"/transactions"}>
         <HStack>
           {/* <Image

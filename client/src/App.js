@@ -20,6 +20,8 @@ import Transactions from "./pages/transaction/transactions";
 import AddTransaction from "./pages/transaction/addTransaction";
 import EditTransaction from "./pages/transaction/editTransaction";
 import Products from "./pages/product/products";
+import AddProduct from "./pages/product/addProduct";
+import EditProduct from "./pages/product/editProduct";
 
 function App() {
   const token = useSelector((state) => state.userReducer.token);
@@ -48,7 +50,7 @@ function App() {
         } catch (error) {
           console.error(error);
           alert(
-            "אירעה תקלה. אנא בדקו את החיבור לאינטרנט או נסו שוב מאוחר יותר"
+            "אירעה תקלה. אנא בדקו את החיבור לאינטרנט או נסו שוב מאוחר יותר",
           );
           authUser.deleteToken();
           navigate("/login");
@@ -110,6 +112,8 @@ function App() {
         <Route path="addCustomer" element={<AddCustomer />} />
         <Route path="editCustomer/:id" element={<EditCustomer />} />
         <Route path="products" element={<Products />} />
+        <Route path="addProduct" element={<AddProduct />} />
+        <Route path="editProduct/:id" element={<EditProduct />} />
         <Route path="transactions" element={<Transactions />} />
         <Route path="addTransaction" element={<AddTransaction />} />
         <Route path="editTransaction/:id" element={<EditTransaction />} />

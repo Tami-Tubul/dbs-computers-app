@@ -75,7 +75,7 @@ export default function TransactionForm({
           >
             <Stack alignItems="flex-start" gap="22px">
               <FormControl isInvalid={!!errors.transactionName}>
-                {/* <FormLabel>שם הפעולה:</FormLabel> */}
+                <FormLabel>שם הפעולה:</FormLabel>
                 <Select
                   defaultValue={initialData.transactionName}
                   placeholder="שם הפעולה"
@@ -97,7 +97,7 @@ export default function TransactionForm({
                 )}
               </FormControl>
               <FormControl isInvalid={!!errors.transactionType}>
-                {/* <FormLabel>סוג הפעולה:</FormLabel> */}
+                <FormLabel>סוג הפעולה:</FormLabel>
                 <Select
                   defaultValue={initialData.transactionType}
                   placeholder="סוג הפעולה"
@@ -119,7 +119,7 @@ export default function TransactionForm({
                 )}
               </FormControl>
               <FormControl isInvalid={!!errors.amount}>
-                {/* <FormLabel>סכום:</FormLabel> */}
+                <FormLabel>סכום:</FormLabel>
                 <Input
                   type="number"
                   defaultValue={initialData.amount || ""}
@@ -135,7 +135,7 @@ export default function TransactionForm({
               </FormControl>
 
               <FormControl isInvalid={!!errors.description}>
-                {/* <FormLabel>תיאור:</FormLabel> */}
+                <FormLabel>תיאור:</FormLabel>
                 <Textarea
                   defaultValue={initialData.description || ""}
                   placeholder="תיאור"
@@ -149,6 +149,7 @@ export default function TransactionForm({
                 )}
               </FormControl>
               <FormControl isInvalid={!!errors.createdBy}>
+                <FormLabel>נוצר על ידי:</FormLabel>
                 <Select
                   placeholder="נוצר על ידי"
                   {...register("createdBy", { required: "שדה חובה" })}
@@ -171,7 +172,7 @@ export default function TransactionForm({
               </FormControl>
 
               <FormControl isInvalid={!!errors.transactionDate}>
-                {/* <FormLabel>תאריך:</FormLabel> */}
+                <FormLabel>תאריך:</FormLabel>
                 <Input
                   type="date"
                   defaultValue={
@@ -199,18 +200,18 @@ export default function TransactionForm({
                     defaultValue={
                       initialData.fixedTransactionEndDate
                         ? toInputDateFormat(
-                            new Date(initialData.fixedTransactionEndDate)
+                            new Date(initialData.fixedTransactionEndDate),
                           )
                         : toInputDateFormat(
                             new Date(
                               initialData.transactionDate
                                 ? new Date(
-                                    initialData.transactionDate
+                                    initialData.transactionDate,
                                   ).getFullYear()
                                 : new Date().getFullYear(),
                               11,
-                              31
-                            )
+                              31,
+                            ),
                           )
                     }
                     placeholder="תאריך סיום"

@@ -30,6 +30,28 @@ const epGetProducts = (token) => {
   });
 };
 
+const epAddProduct = (newProduct, token) => {
+  return axios.post(`${baseURL}/products/addProduct`, newProduct, {
+    headers: { "x-access-token": token },
+  });
+};
+
+const epEditProduct = (updatedProduct, productId, token) => {
+  return axios.put(
+    `${baseURL}/products/editProduct/${productId}`,
+    updatedProduct,
+    {
+      headers: { "x-access-token": token },
+    },
+  );
+};
+
+const epDeleteProduct = (productId, token) => {
+  return axios.delete(`${baseURL}/products/deleteProduct/${productId}`, {
+    headers: { "x-access-token": token },
+  });
+};
+
 const epGetCategories = (token) => {
   return axios.get(`${baseURL}/products/categories`, {
     headers: { "x-access-token": token },
@@ -66,7 +88,7 @@ const epEditClosedOrder = (updatedClosedOrder, orderId, token) => {
     updatedClosedOrder,
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -82,7 +104,7 @@ const epReopenOrder = (orderId, token) => {
     {},
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -104,7 +126,7 @@ const epEditCustomer = (updatedCustomer, customerId, token) => {
     updatedCustomer,
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -126,7 +148,7 @@ const epEditTransaction = (updatedTransaction, transactionId, token) => {
     updatedTransaction,
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -135,7 +157,7 @@ const epDeleteTransaction = (transactionId, token) => {
     `${baseURL}/transactions/deleteTransaction/${transactionId}`,
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -145,7 +167,7 @@ const epFinishTransaction = (transactionId, token) => {
     {},
     {
       headers: { "x-access-token": token },
-    }
+    },
   );
 };
 
@@ -155,6 +177,9 @@ const api = {
   epGetUsers,
   epGetUser,
   epGetProducts,
+  epAddProduct,
+  epEditProduct,
+  epDeleteProduct,
   epGetCategories,
   epGetOrders,
   epAddOrder,

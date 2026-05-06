@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      unique: true,
     },
 
     category: {
@@ -22,6 +23,11 @@ const productSchema = new mongoose.Schema(
         "טאבלטים",
       ],
       required: true,
+    },
+
+    company: {
+      type: String,
+      default: "",
     },
 
     available: {
@@ -44,57 +50,75 @@ const productSchema = new mongoose.Schema(
 
     notes: {
       type: String,
+      default: "",
     },
 
     /* ===== Specification & Pricing ===== */
     specification: {
       type: String,
+      default: "",
     },
 
     dailyPrice: {
       type: Number,
       min: 0,
+      default: 20,
     },
 
     /* ===== Warranty ===== */
     warranty: {
-      startDate: { type: Date },
-      endDate: { type: Date },
+      startDate: { type: Date, default: null },
+      endDate: { type: Date, default: null },
     },
 
     /* ===== Computer Only ===== */
     computerDetails: {
-      isAdvanced: {
-        type: Boolean,
-        default: false,
+      type: {
+        isAdvanced: {
+          type: Boolean,
+          default: false,
+        },
+        officeLicense: {
+          type: String,
+          default: "",
+        },
+        serialNumber: {
+          type: String,
+          default: "",
+        },
+        checkDate: {
+          type: Date,
+          default: null,
+        },
+        softwares: {
+          type: [String],
+          default: [],
+        },
       },
-
-      officeLicense: {
-        type: String,
-      },
-
-      serialNumber: {
-        type: String,
-      },
-
-      checkDate: {
-        type: Date,
-      },
-
-      softwares: {
-        type: [String],
-      },
+      default: {},
     },
 
     /* ===== Network Devices (Sticks / Routers) ===== */
     networkDetails: {
-      filtering: {
-        type: String,
-      },
+      type: {
+        simDetails: {
+          type: {
+            phoneNumber: { type: String, default: "" },
+            simNumber: { type: String, default: "" },
+            carrierCompany: { type: String, default: "" },
+          },
+          default: {},
+        },
 
-      active: {
-        type: Boolean,
+        wifiDetails: {
+          type: {
+            ssid: { type: String, default: "" },
+            password: { type: String, default: "" },
+          },
+          default: {},
+        },
       },
+      default: {},
     },
   },
   {

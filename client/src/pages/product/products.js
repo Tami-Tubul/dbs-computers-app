@@ -1,25 +1,37 @@
-import { Heading, HStack, Text, VStack, Box, Button } from "@chakra-ui/react";
+import {
+  Heading,
+  HStack,
+  Text,
+  VStack,
+  Box,
+  Button,
+  TabPanels,
+  TabPanel,
+  TabList,
+  Tab,
+  Tabs,
+} from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { EditIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import DataTable from "./../../components/dataTable";
+import api from "../../services/api";
 
 export default function Products() {
   const token = useSelector((state) => state.userReducer.token);
-  const customers = useSelector((state) => state.customerReducer.customers);
-  const sortedCustomers = [...customers].sort(
-    (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+  const productsByCategory = useSelector(
+    (state) => state.productReducer.products,
   );
-  const [filterOrders, setFilterOrders] = useState(null);
+  const [filtersByCategory, setFiltersByCategory] = useState({});
   // const [selectedRow, setSelectedRow] = useState(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const columnHelper = createColumnHelper();
-  const columns = useMemo(() => {
+  const getColumns = (category) => {
     return [
       // columnHelper.accessor("_id", {
       //   cell: (info) =>
@@ -31,82 +43,134 @@ export default function Products() {
       //   enableSorting: false,
       //   enableFiltering: false,
       // }),
-      columnHelper.accessor("fullname", {
+      columnHelper.accessor("productName", {
         cell: (info) => {
           const row = info.row.original;
+          return <Text variant={"runningText"}>{info.getValue()}</Text>;
+        },
+        header: () => "שם מוצר",
+        enableSorting: true,
+        enableFiltering: true,
+      }),
+
+      columnHelper.accessor("status", {
+        cell: (info) => {
+          return <Text variant="runningText">{info.getValue() || "-"}</Text>;
+        },
+        header: () => "סטטוס",
+        enableSorting: true,
+        enableFiltering: true,
+      }),
+
+      columnHelper.accessor("available", {
+        cell: (info) => {
           return (
             <Text variant={"runningText"}>
-              {`${row.firstname} ${row.lastname}`}
+              {info.getValue() ? "פנוי" : "תפוס"}
             </Text>
           );
         },
-        header: () => "שם לקוח",
+        header: () => "זמינות",
         enableSorting: true,
         enableFiltering: true,
       }),
-      columnHelper.accessor("phone", {
+      columnHelper.accessor("specification", {
         cell: (info) => {
           return <Text variant={"runningText"}>{info.getValue()}</Text>;
         },
-        header: () => "טלפון",
+        header: () => "מפרט",
         enableSorting: true,
         enableFiltering: true,
       }),
-      columnHelper.accessor("address", {
+
+      ...(category === "מחשבים"
+        ? [
+            columnHelper.accessor("computerDetails.softwares", {
+              cell: (info) => {
+                const softwares = info.getValue();
+                return (
+                  <Text variant={"runningText"}>
+                    {info.getValue()?.join(", ") || "-"}
+                  </Text>
+                );
+              },
+              header: () => "תוכנות",
+              enableSorting: true,
+              enableFiltering: true,
+            }),
+          ]
+        : []),
+
+      columnHelper.accessor("currentOrder", {
+        header: () => "קישור להזמנה",
         cell: (info) => {
-          return <Text variant={"runningText"}>{info.getValue()}</Text>;
+          const orderId = info.getValue();
+
+          if (!orderId) return <Text>-</Text>;
+
+          return (
+            <Link to={`/editOrder/${orderId}`}>
+              <Text
+                variant={"runningText"}
+                color={"primary.linkBrandBright"}
+                textDecoration="underline"
+              >
+                מעבר להזמנה
+              </Text>
+            </Link>
+          );
         },
-        header: () => "כתובת",
-        enableSorting: true,
-        enableFiltering: true,
-      }),
-      columnHelper.accessor("email", {
-        cell: (info) => {
-          return <Text variant={"runningText"}>{info.getValue()}</Text>;
-        },
-        header: () => "מייל",
-        enableSorting: true,
-        enableFiltering: true,
       }),
 
       columnHelper.accessor("_id", {
         cell: (info) => {
-          // const handleDelete = async () => {
-          //     const confirmed = window.confirm("האם אתה בטוח שברצונך למחוק את הלקוח?");
-          //     if (confirmed) {
-          //         const resp = await api.epDeleteCustomer(info.getValue(), token);
-          //         const { message, removedProductIds } = resp.data;
-          //         if (resp.status === 200) {
-          //             dispatch({ type: "DELETE_CUSTOMER", payload: info.getValue() });
-          //             dispatch({ type: "UPDATE_PRODUCTS", payload: { removedProductIds } }); //update order products to available true
-          //             alert(message);
-          //         }
-          //     }
-          // };
+          const handleDelete = async () => {
+            const confirmed = window.confirm(
+              "האם אתה בטוח שברצונך למחוק את המוצר?",
+            );
+            if (confirmed) {
+              try {
+                const resp = await api.epDeleteProduct(info.getValue(), token);
+                const { message } = resp.data;
+                if (resp.status === 200) {
+                  dispatch({
+                    type: "DELETE_PRODUCT",
+                    payload: info.getValue(),
+                  });
+                  alert(message);
+                }
+              } catch (error) {
+                console.error(error);
+                if (error.response.status === 400)
+                  alert(error.response.data.message);
+              }
+            }
+          };
 
           return (
             <HStack justifyContent={"end"} gap={"20px"} flexWrap={"wrap"}>
               <Link
-                to={`/editCustomer/${info.getValue()}`}
-                title="ערוך פרטי לקוח"
-                aria-label="ערוך פרטי לקוח"
+                to={`/editProduct/${info.getValue()}`}
+                title="ערוך פרטי מוצר"
+                aria-label="ערוך פרטי מוצר"
               >
                 <EditIcon w="22px" h="22px" color={"primary.dbsGoldenrod"} />
               </Link>
-              {/* <Button variant={"link"} onClick={handleDelete} title="מחק לקוח" aria-label="מחק לקוח">
-                                <DeleteIcon
-                                    w="22px"
-                                    h="22px"
-                                    color={"primary.error"}
-                                />
-                            </Button> */}
+              <Button
+                variant={"link"}
+                onClick={handleDelete}
+                title="מחק מוצר"
+                aria-label="מחק מוצר"
+              >
+                <DeleteIcon w="22px" h="22px" color={"primary.error"} />
+              </Button>
             </HStack>
           );
         },
         header: () => "",
       }),
     ];
-  }, [sortedCustomers]);
+  };
 
   // const onRowClick = (row) => {
   //     setSelectedRow(row);
@@ -115,7 +179,7 @@ export default function Products() {
   return (
     <VStack gap="20px">
       <Heading as="h1" variant={"h1"}>
-        לקוחות
+        מוצרים
       </Heading>
       <Box
         h={"100%"}
@@ -124,33 +188,57 @@ export default function Products() {
         boxShadow="0 2px 20px 0px rgba(0,0,0,0.08)"
         px="28px"
         w="100%"
-        maxW={"1000px"}
+        maxW={"1200px"}
         position={"relative"}
       >
         <Button
           variant={"primary"}
           p="16px"
-          onClick={() => navigate("/addCustomer")}
+          onClick={() => navigate("/addProduct")}
           position={"absolute"}
           right={0}
           top={"-60px"}
         >
-          הוסף לקוח
+          הוסף מוצר
         </Button>
-        <DataTable
-          // selectedRow={selectedRow}
-          // onRowClick={onRowClick}
-          columns={columns}
-          originalData={sortedCustomers}
-          data={!filterOrders ? sortedCustomers : filterOrders}
-          variant={"orders"}
-          scroll={true}
-          pageSize={8}
-          filteredData={(newData) => setFilterOrders(newData)}
-          isLoading={
-            !sortedCustomers || sortedCustomers.length === 0 || !filterOrders
-          }
-        />
+
+        <Tabs>
+          <TabList>
+            {productsByCategory.map((cat, index) => (
+              <Tab key={cat.category}>
+                {cat.category} ({cat.list.length})
+              </Tab>
+            ))}
+          </TabList>
+
+          <TabPanels>
+            {productsByCategory.map((cat, index) => (
+              <TabPanel key={cat.category} px={0}>
+                <DataTable
+                  // selectedRow={selectedRow}
+                  // onRowClick={onRowClick}
+                  columns={getColumns(cat.category)}
+                  originalData={cat.list}
+                  data={
+                    filtersByCategory[cat.category]?.length
+                      ? filtersByCategory[cat.category]
+                      : cat.list
+                  }
+                  variant={"orders"}
+                  scroll={true}
+                  pageSize={10}
+                  filteredData={(newData) =>
+                    setFiltersByCategory((prev) => ({
+                      ...prev,
+                      [cat.category]: newData,
+                    }))
+                  }
+                  isLoading={!cat.list}
+                />
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
       </Box>
     </VStack>
   );

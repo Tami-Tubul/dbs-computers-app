@@ -9,6 +9,7 @@ import popoverTheme from "./components/popover";
 import textareaTheme from "./components/textarea";
 import checkboxTheme from "./components/checkbox";
 import numberInputTheme from "./components/numberInput";
+import tabTheme from "./components/tabs";
 
 const theme = extendTheme({
   initialColorMode: "light",
@@ -167,6 +168,7 @@ const theme = extendTheme({
     Textarea: textareaTheme,
     Checkbox: checkboxTheme,
     NumberInput: numberInputTheme,
+    Tabs: tabTheme,
   },
 });
 
