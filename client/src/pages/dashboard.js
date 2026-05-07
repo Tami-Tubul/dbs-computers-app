@@ -10,78 +10,109 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
+import { useEffect, useMemo, useState } from "react";
 import _ from "lodash";
-import { useState, useEffect } from "react";
 
-export default function Dashboard() {
-  const products = useSelector((state) => state.productReducer.products);
-  const [animatedValues, setAnimatedValues] = useState([]);
+const AnimatedProgress = ({ targetValue, totalLabel }) => {
+  const [currentValue, setCurrentValue] = useState(0);
 
   useEffect(() => {
-    if (!_.isEmpty(products)) {
-      const intervals = products.map((prod, index) => {
-        const availableProducts = prod.list.filter((p) => p.available).length;
-        const unavailableProducts = prod.list.length - availableProducts;
-        const targetValue = (unavailableProducts / prod.list.length) * 100;
-
-        let currentValue = 0;
-        return setInterval(() => {
-          if (currentValue < targetValue) {
-            setAnimatedValues((prev) => {
-              const newValues = [...prev];
-              newValues[index] = currentValue + 1;
-              return newValues;
-            });
-            currentValue += 1;
-          } else {
-            clearInterval(intervals[index]);
-          }
-        }, 10);
-      });
-      return () => intervals.forEach((interval) => clearInterval(interval));
+    if (targetValue <= 0) {
+      setCurrentValue(0);
+      return;
     }
-  }, [products]);
+
+    const duration = 100;
+    const frameRate = 10;
+    const totalFrames = duration / frameRate;
+    const increment = targetValue / totalFrames;
+
+    const interval = setInterval(() => {
+      setCurrentValue((prev) => {
+        const nextValue = prev + increment;
+        if (nextValue >= targetValue) {
+          clearInterval(interval);
+          return targetValue;
+        }
+        return nextValue;
+      });
+    }, frameRate);
+
+    return () => clearInterval(interval);
+  }, [targetValue]);
 
   return (
-    <Container maxW="70%">
-      <HStack justifyContent={"center"} gap="80px" flexWrap={"wrap"}>
-        {_.isEmpty(products) && (
-          <Box h={"100%"} mt="150px">
-            <Spinner />
-          </Box>
-        )}
-        {products?.map((prod, index) => {
-          const availableProducts = prod.list.filter((p) => p.available).length;
-          const unavailableProducts = prod.list.length - availableProducts;
-          const animatedValue = animatedValues[index] || 0;
-          return (
-            <VStack gap="12px" key={`prod_${index}`}>
-              <Text variant={"runningTextSb"}>{prod.category}</Text>
-              <CircularProgress
-                value={animatedValue}
-                size="120px"
-                thickness="15px"
-                color="primary.dbsGold"
-                trackColor="primary.dbsBlue"
-              >
-                <CircularProgressLabel
-                  color="primary.dbsBlue"
-                  fontSize={"18px"}
-                  fontWeight={600}
-                >
-                  {prod.list.length}
-                </CircularProgressLabel>
-              </CircularProgress>
-              <HStack>
-                <Tag bgColor="primary.dbsGold">{`בשימוש: ${unavailableProducts}`}</Tag>
-                <Tag
-                  bgColor="primary.dbsBlue"
-                  color="white"
-                >{`פנויים: ${availableProducts}`}</Tag>
-              </HStack>
-            </VStack>
-          );
-        })}
+    <CircularProgress
+      value={currentValue}
+      size="120px"
+      thickness="15px"
+      color="primary.dbsGold"
+      trackColor="primary.dbsBlue"
+    >
+      <CircularProgressLabel
+        color="primary.dbsBlue"
+        fontSize="18px"
+        fontWeight={600}
+      >
+        {totalLabel}
+      </CircularProgressLabel>
+    </CircularProgress>
+  );
+};
+
+export default function Dashboard() {
+  const allproducts = useSelector((state) => state.productReducer.products);
+
+  const products = useMemo(() => {
+    return (
+      allproducts?.map((cat) => {
+        const filteredList = cat.list.filter((p) => p.status !== "נמכר");
+        const available = filteredList.filter((p) => p.available).length;
+        const total = filteredList.length;
+        const targetPercentage =
+          total === 0 ? 0 : ((total - available) / total) * 100;
+
+        return {
+          ...cat,
+          list: filteredList,
+          available,
+          unavailable: total - available,
+          targetPercentage,
+        };
+      }) || []
+    );
+  }, [allproducts]);
+
+  if (_.isEmpty(products)) {
+    return (
+      <Container maxW="70%">
+        <Box h="100%" mt="150px" textAlign="center">
+          <Spinner size="xl" />
+        </Box>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxW="70%" py={10}>
+      <HStack justifyContent="center" gap="80px" flexWrap="wrap">
+        {products.map((prod, index) => (
+          <VStack gap="12px" key={prod.id || prod.category || index}>
+            <Text variant="runningTextSb">{prod.category}</Text>
+
+            <AnimatedProgress
+              targetValue={prod.targetPercentage}
+              totalLabel={prod.list.length}
+            />
+
+            <HStack>
+              <Tag bgColor="primary.dbsGold">{`בשימוש: ${prod.unavailable}`}</Tag>
+              <Tag bgColor="primary.dbsBlue" color="white">
+                {`פנויים: ${prod.available}`}
+              </Tag>
+            </HStack>
+          </VStack>
+        ))}
       </HStack>
     </Container>
   );
