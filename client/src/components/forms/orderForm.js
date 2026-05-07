@@ -37,6 +37,7 @@ import {
 import _ from "lodash";
 import CustomSelect from "../customSelect";
 import CustomerForm from "./customerForm";
+import { getProductStatusIcon } from "../../utils/productStatus";
 
 export default function OrderForm({
   initialData = {},
@@ -326,6 +327,7 @@ export default function OrderForm({
                       isInvalid={!!errors.products?.[index]?.product?.category}
                     >
                       <Select
+                        minW={"180px"}
                         defaultValue={field.product?.category}
                         placeholder="סוג מוצר"
                         aria-label="סוג מוצר"
@@ -353,6 +355,7 @@ export default function OrderForm({
                     </FormControl>
                     <FormControl isInvalid={!!errors.products?.[index]?._id}>
                       <Select
+                        minW={"180px"}
                         defaultValue={field.product?._id}
                         placeholder="שם מוצר"
                         aria-label="שם מוצר"
@@ -375,22 +378,28 @@ export default function OrderForm({
                               (productCategories[index] ||
                                 field.product?.category),
                           )
-                          ?.list.map((product) => {
+                          ?.list.filter((product) => product.status !== "נמכר")
+                          .map((product) => {
+                            const productStatus = getProductStatusIcon(product);
                             return (
                               <option
                                 key={product._id}
                                 value={product._id}
+                                title={productStatus?.title || ""}
                                 disabled={
-                                  !product.available &&
-                                  !initialData?.products?.some(
-                                    (p) => p.product?._id === product._id,
-                                  )
+                                  product.status !== "פעיל" ||
+                                  (!product.available &&
+                                    !initialData?.products?.some(
+                                      (p) => p.product?._id === product._id,
+                                    ))
                                     ? true
                                     : false
                                 }
                               >
                                 {product.productName}
                                 {product.computerDetails?.isAdvanced && " ⭐"}
+                                {productStatus?.icon &&
+                                  ` ${productStatus.icon}`}
                               </option>
                             );
                           })}

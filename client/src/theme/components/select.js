@@ -6,8 +6,7 @@ const { definePartsStyle, defineMultiStyleConfig } =
 
 const baseStyle = definePartsStyle({
   field: {
-    w: "inherit",
-    minW: "146px",
+    w: "100%",
     p: "8px 0px 8px 16px", //because icon stay on the padding
     //p: "8px 19px 8px 16px",
     boxShadow: " 0px 2px 20px 0px rgba(0, 0, 0, 0.08)",
@@ -30,18 +29,12 @@ const baseStyle = definePartsStyle({
   icon: {},
 });
 
-const shortSelect = definePartsStyle({
-  field: {
-    w: "320px",
-  },
-});
-
 const brand = definePartsStyle({});
 
 const selectTheme = defineMultiStyleConfig({
   baseStyle,
   defaultProps: { variant: brand },
-  variants: { brand, shortSelect },
+  variants: { brand },
 });
 
 export default selectTheme;

@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { EditIcon, StarIcon, UnlockIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
-import naturalCompare from "../../utils/naturalCompare";
 import getDeliveryText from "../../utils/getDeliveryText";
 import api from "../../services/api";
 import DataTable from "../../components/dataTable";
@@ -13,12 +12,7 @@ import {
   hebrewDateFormat,
   timeFormat,
 } from "../../utils/formatDate";
-
-const customProductSort = (a, b) => {
-  const productA = a.original.products[0]?.product?.productName || "";
-  const productB = b.original.products[0]?.product?.productName || "";
-  return naturalCompare(productA, productB);
-};
+import { customProductSort } from "../../utils/customProductSort";
 
 export default function ClosedOrders() {
   const token = useSelector((state) => state.userReducer.token);

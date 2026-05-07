@@ -10,16 +10,10 @@ import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeleteIcon, EditIcon, LockIcon, StarIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
-import naturalCompare from "../../utils/naturalCompare";
 import getDeliveryText from "../../utils/getDeliveryText";
 import api from "../../services/api";
 import DataTable from "../../components/dataTable";
-
-const customProductSort = (a, b) => {
-  const productA = a.original.products[0]?.product?.productName || "";
-  const productB = b.original.products[0]?.product?.productName || "";
-  return naturalCompare(productA, productB);
-};
+import { customProductSort } from "../../utils/customProductSort";
 
 export default function OpenOrders() {
   const token = useSelector((state) => state.userReducer.token);

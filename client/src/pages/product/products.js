@@ -17,11 +17,7 @@ import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Link, useNavigate } from "react-router-dom";
 import DataTable from "./../../components/dataTable";
 import api from "../../services/api";
-
-export const getDisplayStatus = (product) => {
-  if (product.status !== "פעיל") return product.status; // "תקול" / "מושהה" / "נמכר"
-  return product.available ? "פנוי" : "תפוס";
-};
+import { getDisplayStatus } from "../../utils/productStatus";
 
 export default function Products() {
   const token = useSelector((state) => state.userReducer.token);
