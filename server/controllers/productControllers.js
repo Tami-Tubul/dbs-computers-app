@@ -23,7 +23,7 @@ const naturalSort = (a, b) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    const allProducts = await Product.find({});
+    const allProducts = await Product.find({ status: { $ne: "נמכר" } });
 
     const activeOrders = await Order.find({
       orderStatus: { $ne: "סגורה" },
@@ -75,7 +75,10 @@ const getProductsByCategory = async (req, res, next) => {
 
   try {
     // search product by category
-    const products = await Product.find({ category: categoryName });
+    const products = await Product.find({
+      category: categoryName,
+      status: { $ne: "נמכר" },
+    });
     return res.status(200).json({ products: products });
   } catch (error) {
     next(error);

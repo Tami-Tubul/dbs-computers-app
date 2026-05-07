@@ -22,7 +22,7 @@ const AnimatedProgress = ({ targetValue, totalLabel }) => {
       return;
     }
 
-    const duration = 100;
+    const duration = 200;
     const frameRate = 10;
     const totalFrames = duration / frameRate;
     const increment = targetValue / totalFrames;
@@ -66,28 +66,32 @@ export default function Dashboard() {
   const products = useMemo(() => {
     return (
       allproducts?.map((cat) => {
-        const filteredList = cat.list.filter((p) => p.status !== "נמכר");
-        const available = filteredList.filter((p) => p.available).length;
-        const total = filteredList.length;
-        const targetPercentage =
-          total === 0 ? 0 : ((total - available) / total) * 100;
+        const total = cat.list.length;
+        const available = cat.list.filter((p) => p.available).length;
+        const unavailable = total - available;
+        const targetPercentage = total === 0 ? 0 : (unavailable / total) * 100;
 
         return {
           ...cat,
-          list: filteredList,
           available,
-          unavailable: total - available,
+          unavailable,
+          total,
           targetPercentage,
         };
       }) || []
     );
   }, [allproducts]);
 
-  if (_.isEmpty(products)) {
+  if (_.isEmpty(allproducts)) {
     return (
       <Container maxW="70%">
-        <Box h="100%" mt="150px" textAlign="center">
-          <Spinner size="xl" />
+        <Box
+          h="300px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Spinner size="xl" color="primary.dbsBlue" thickness="4px" />
         </Box>
       </Container>
     );
@@ -102,12 +106,14 @@ export default function Dashboard() {
 
             <AnimatedProgress
               targetValue={prod.targetPercentage}
-              totalLabel={prod.list.length}
+              totalLabel={prod.total}
             />
 
-            <HStack>
-              <Tag bgColor="primary.dbsGold">{`בשימוש: ${prod.unavailable}`}</Tag>
-              <Tag bgColor="primary.dbsBlue" color="white">
+            <HStack spacing={3}>
+              <Tag size="lg" bgColor="primary.dbsGold" color="black">
+                {`בשימוש: ${prod.unavailable}`}
+              </Tag>
+              <Tag size="lg" bgColor="primary.dbsBlue" color="white">
                 {`פנויים: ${prod.available}`}
               </Tag>
             </HStack>
