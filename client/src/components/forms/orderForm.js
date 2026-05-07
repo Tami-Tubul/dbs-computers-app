@@ -130,9 +130,9 @@ export default function OrderForm({
       setIsLoadingModal(true);
       const resp = await api.epAddCustomer(customerData, token);
       if (resp.status === 201) {
-        dispatch({ type: "ADD_CUSTOMER", payload: resp.data });
+        dispatch({ type: "ADD_CUSTOMER", payload: resp.data.customer });
         setValue("customer", {
-          value: resp.data._id,
+          value: resp.data.customer._id,
           label: `${customerData.firstname} ${customerData.lastname} ${customerData.phone}`,
         });
         onClose(); //close addCcustomer modal
